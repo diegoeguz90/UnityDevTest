@@ -6,12 +6,12 @@ using UnityEngine.InputSystem;
 public class GridManager : MonoBehaviour
 {
     public static GridManager instance;
-    private Block[,] allBlocks; // Nuestro mapa de la cuadrícula
+    private Block[,] allBlocks; // grid map
 
     private void Awake()
     {
         instance = this;
-        // Inicializamos el array con el tamaño de la cuadrícula
+        // grid size
         allBlocks = new Block[gridWidth, gridHeight];
     }
 
@@ -57,10 +57,9 @@ public class GridManager : MonoBehaviour
                 Block blockScript = newBlock.GetComponent<Block>();
                 blockScript.x = x;
                 blockScript.y = y;
-                allBlocks[x, y] = blockScript; // Esta línea ya la tenías, ahora usa la nueva variable
+                allBlocks[x, y] = blockScript; 
 
-
-                // Guardamos la referencia del script del nuevo bloque en nuestro mapa
+                // Save map positions
                 allBlocks[x, y] = newBlock.GetComponent<Block>();
 
                 int randomIndex = Random.Range(0, blockSprites.Count);
@@ -200,38 +199,39 @@ public class GridManager : MonoBehaviour
 
     private void ApplyGravity()
     {
-        // Recorremos cada columna
+        // Itera a través de cada columna, de izquierda a derecha
         for (int x = 0; x < gridWidth; x++)
         {
-            // Empezamos desde abajo hacia arriba
+            // 1. Primero, recoge todos los bloques que quedan en la columna actual en una lista temporal
+            List<Block> survivingBlocks = new List<Block>();
             for (int y = 0; y < gridHeight; y++)
             {
-                // Si encontramos un espacio vacío...
-                if (allBlocks[x, y] == null)
+                if (allBlocks[x, y] != null)
                 {
-                    // ...buscamos el primer bloque que esté por encima.
-                    for (int y2 = y + 1; y2 < gridHeight; y2++)
-                    {
-                        if (allBlocks[x, y2] != null)
-                        {
-                            // ¡Encontramos un bloque! Lo movemos hacia abajo.
-                            Block blockToMove = allBlocks[x, y2];
+                    survivingBlocks.Add(allBlocks[x, y]);
+                }
+            }
 
-                            // Actualizamos su posición en el mapa lógico
-                            allBlocks[x, y] = blockToMove;
-                            allBlocks[x, y2] = null;
+            // 2. Ahora, re-ubica los bloques de la lista en la parte inferior de la columna
+            for (int y = 0; y < gridHeight; y++)
+            {
+                if (y < survivingBlocks.Count) // Si todavía hay bloques en nuestra lista para esta celda
+                {
+                    Block block = survivingBlocks[y];
 
-                            // Actualizamos sus coordenadas internas
-                            blockToMove.y = y;
+                    // Actualiza el mapa lógico con la nueva posición del bloque
+                    allBlocks[x, y] = block;
 
-                            // Movemos el GameObject a su nueva posición visual
-                            Vector2 targetPosition = startPosition + new Vector2(x * cellSpacing, y * cellSpacing);
-                            blockToMove.transform.localPosition = targetPosition;
+                    // Actualiza las coordenadas internas del bloque
+                    block.y = y;
 
-                            // Salimos del bucle interior para seguir buscando espacios vacíos
-                            break;
-                        }
-                    }
+                    // Mueve el GameObject a su nueva posición visual
+                    Vector2 targetPosition = startPosition + new Vector2(x * cellSpacing, y * cellSpacing);
+                    block.transform.localPosition = targetPosition;
+                }
+                else // Si ya no quedan bloques en la lista, esta celda y las de arriba están vacías
+                {
+                    allBlocks[x, y] = null;
                 }
             }
         }

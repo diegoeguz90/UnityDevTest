@@ -3,10 +3,10 @@ using UnityEngine;
 [RequireComponent(typeof(Camera))]
 public class ResponsiveCamera : MonoBehaviour
 {
-    // Arrastra aquí tu objeto GridBackground desde la escena
+    // reference to grid
     [SerializeField] private SpriteRenderer gridBackground;
 
-    // Un pequeño margen extra para que no quede pegado a los bordes
+    // block separation
     [SerializeField] private float margin = 1.0f;
 
     private Camera mainCamera;
@@ -25,17 +25,16 @@ public class ResponsiveCamera : MonoBehaviour
             return;
         }
 
-        // 1. Mide el ancho de la cuadrícula
+        // Grid width
         float gridWidth = gridBackground.bounds.size.x + margin;
 
-        // 2. Calcula la proporción de la pantalla del dispositivo
+        // Screen ratio
         float screenRatio = (float)Screen.width / (float)Screen.height;
 
-        // 3. Calcula el nuevo tamaño ortográfico
-        // La fórmula asegura que el ancho de la cuadrícula quepa en el ancho de la pantalla
+        // Make the grid in the center of camera
         float newOrthographicSize = gridWidth / screenRatio / 2f;
 
-        // 4. Aplica el nuevo tamaño a la cámara
+        // Size for camera
         mainCamera.orthographicSize = newOrthographicSize;
     }
 }
