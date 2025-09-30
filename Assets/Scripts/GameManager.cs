@@ -4,6 +4,8 @@ using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
+    public static GameManager instance; // Para el Singleton
+
     // Game variables
     private int score;
     private int moves;
@@ -13,6 +15,11 @@ public class GameManager : MonoBehaviour
     [SerializeField] private TextMeshProUGUI scoreValue;
     [SerializeField] private TextMeshProUGUI movesValue;
     [SerializeField] private GameObject gameOverScreen;
+
+    private void Awake()
+    {
+        instance = this;
+    }
 
     // Esta función se llama automáticamente una sola vez cuando empieza el juego
     void Start()
@@ -57,6 +64,29 @@ public class GameManager : MonoBehaviour
             {
                 TriggerGameOver();
             }
+        }
+    }
+
+    public void AddScore(int amount)
+    {
+        score += amount;
+        UpdateUI();
+    }
+
+    public void UseMove()
+    {
+        if (isGameOver) return;
+
+        moves--;
+        UpdateUI();
+        CheckGameOver(); // Reutilizamos la función que ya tenías
+    }
+
+    void CheckGameOver()
+    {
+        if (moves <= 0)
+        {
+            TriggerGameOver();
         }
     }
 
